@@ -103,9 +103,10 @@ class Loader:
                         all_res.append(res.get_resname())
                         all_pos.append(torch.from_numpy(atom.get_coord()))
                         all_atom.append((atom.get_name(), atom.element))
+                        resid = f'{res.id[1]}{res.id[2]}'
                         self.add_values_to_dict(visualization_values,
                                                 chain=repr(chain).replace("<Chain id=", "").replace(">", ""),
-                                                residue=res.get_segid(),
+                                                residue=resid,
                                                 atom_name=atom.get_name(),
                                                 element=atom.element)
         all_pos = torch.stack(all_pos, dim=0)
