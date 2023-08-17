@@ -186,9 +186,9 @@ def sample(data_list, model, args, epoch=0, visualize_first_n_samples=0,
             # === end of batch ===
             #printt(f'finished batch {com_idx}')
 
-        for i in range(visualize_first_n_samples):
-            write_pdb(visualization_values[i], new_data_list[i], "ligand",
-                      f"{visualization_dirs[i]}/{four_letter_pdb_names[i]}-ligand-{t_idx + 1}.pdb")
+        # for i in range(visualize_first_n_samples):
+        #     write_pdb(visualization_values[i], new_data_list[i], "ligand",
+        #               f"{visualization_dirs[i]}/{four_letter_pdb_names[i]}-ligand-step{t_idx + 1}-{i}.pdb")
 
         # update starting point for next step
         assert len(new_data_list) == len(data_list)
@@ -200,7 +200,7 @@ def sample(data_list, model, args, epoch=0, visualize_first_n_samples=0,
             break
         # === end of timestep ===
 
-    return data_list#, batch_size_to_return
+    return data_list, (visualization_values, four_letter_pdb_names, visualization_dirs)#, batch_size_to_return
 
 
 def create_visualization_directories(top_visualization_dir, epoch, pdb_names):
@@ -232,7 +232,7 @@ def to_pdb_lines(visualization_values, graph, part):
             xyz = graph[part].pos[i]
 
             line = f'ATOM  {i + 1:>5} {this_vis_values["atom_name"][i]:>4} '
-            line = line + f'{resname} {this_vis_values["chain"][i]}{this_vis_values["residue"][i]:>4}    '.replace("<Chain id=", "").replace(">", "")
+            line = line + f'{resname} {this_vis_values["chain"][i]}{this_vis_values["residue"][i]:>5}   '.replace("<Chain id=", "").replace(">", "")
             line = line + f'{xyz[0]:>8.3f}{xyz[1]:>8.3f}{xyz[2]:>8.3f}'
             line = line + '  1.00  0.00          '
             line = line + f'{this_vis_values["element"][i]:>2} 0\n'

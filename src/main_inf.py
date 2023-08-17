@@ -24,7 +24,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.data import HeteroData
 from geom_utils import set_time
 # from helpers import WandbLogger, TensorboardLogger
-from sample import sample
+from sample import sample, write_pdb
 from evaluation.compute_rmsd import evaluate_all_rmsds
 
 
@@ -334,11 +334,24 @@ def main(args=None):
         loaders,results = generate_loaders(loaders["test"],args) #TODO adapt sample size
         
         for i,loader in tqdm(enumerate(loaders), total=len(loaders)):
-            samples_list = sample(loader, model, args, visualize_first_n_samples=args.visualize_n_val_graphs) #TODO: should work on data loader
+            samples_list, for_visualization = sample(loader, model, args, visualize_first_n_samples=args.visualize_n_val_graphs, visualization_dir=args.visualization_path) #TODO: should work on data loader
             samples_loader = DataLoader(samples_list,batch_size=args.batch_size)
             pred_list = evaluate_confidence(model_confidence,samples_loader,args) # TODO -> maybe list inside
             results[i]= results[i]+sorted(list(zip(samples_list,pred_list)),key=lambda x:-x[1]) 
             printt("Finished Complex!")          
+
+            # visualize after sorting
+            visualization_tuples = zip(
+                samples_list,
+                pred_list,
+                *for_visualization,
+            )
+            visualization_tuples = sorted(visualization_tuples, key=lambda x:-x[1])
+
+            for rank, (graph, score, visualization_value, four_letter_pdb_name, visualization_dir) in enumerate(visualization_tuples):
+                write_pdb(visualization_value, graph, "ligand",
+                        f"{visualization_dir}/{four_letter_pdb_name}-ligand-rank{rank}.pdb")
+
        
 
         printt(f'Finished run {args.run_name}')
